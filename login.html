@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<!-- 
+    Vincent Nguyen 
+    Feb 2018 
+-->
+<html>
+    <head>
+        <title> Login - CS 275 Project </title>
+
+        <script src="scripts/server.js"> </script>
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"> </script>
+    </head>
+    <body>
+        <h1> Welcome </h1>
+        <h3> Existing User Login </h3>
+        <input id="exUser" type="text" placeholder="Username">
+        <input id="exPass" type="password" placeholder="Password">
+        <input id="exLogin" type="button" value="Submit" onclick="login()">
+        
+        <h3> New User Account Creation </h3>
+        <input id="newUser" type="text" placeholder="Username">
+        <input id="newPass" type="password" placeholder="Password">
+        <input id="newLogin" type="button" value="Submit" onclick="makeUser()">
+        <br> <br>
+        <h4> Play as a Guest </h4>
+        <a href="game.html"><input type="button" value="Play"></a>
+    </body>
+</html>

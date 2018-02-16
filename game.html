@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<!-- Vincent Nguyen 2018 -->
+<html>
+    <head>
+        <title> Game Title </title>
+
+        <link rel="stylesheet" href="stylesheets/style.css">
+        <script src="scripts/interact.js"> </script>
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"> </script>
+    </head>
+    <body onkeypress="movePlayer(event)">
+        <div class="nav">
+            <input class="btn" type="button" value="Play" onclick="startGame()"> <br>
+            <a href="help.html"><input class="btn" type="button" value="Help"></a> <br>
+            <input class="btn" type="button" value="Options"> <br>
+            <a href="login.html"><input class="btn" type="button" value="Back to Login"></a> <br>
+            <!-- <input class="btn" type="button" value="Reset Player" onclick="reset()"> <br> -->
+            <br>
+            <!--
+            <h4> Board size: </h4>
+            <p> Width: </p>
+            <input id="width" type="text" value="5">
+            <p> Height: </p>
+            <input id="height" type="text" value="5"> <br>
+            -->
+            <!-- <input class="btn" type="button" value="Set" onclick="setBoard()"> <br> -->
+            <h4> Level: </h4>
+            <p id="level"> 
+                <!-- Current level goes here -->
+            </p>
+            <h4> How to play: </h4>
+            <p> W, A, S, D to move </p>
+        </div>
+        <div id="world">
+            <table id="board">
+                <!-- Board is generated here -->
+            </table>
+        </div>
+
+    </body>
+</html>

@@ -1,0 +1,75 @@
+/* 
+style.css 
+Vincent Nguyen
+Feb 2018
+*/
+
+body {
+    margin: 0;
+    padding: 0;
+}
+
+.nav {
+    position: absolute;
+    float: left;
+    width: 20%;
+    height: 100%;
+    margin: 0;
+    background-color: #eee;
+}
+
+.nav input {
+    width: 80%;
+    font-size: 1em;
+    margin: 5% 0 0 10%;
+}
+
+.nav p, h4 {
+    margin: 3% 0 0 10%;
+}
+
+#world {
+    position: absolute;
+    float: right;
+    width: 80%;
+    height: 100%;
+    margin: 0 0 0 20%;
+}
+
+#board {
+    width: 100%;
+    height: 100%;
+}
+
+#board td {   
+    border: 1px solid black;
+}
+
+#player {
+    margin-left: 25%;
+    padding: 0;
+    width: 50%;
+    height: 50%;
+    align-content: center;
+    background-color: green;
+}
+
+.hidbattle, .hidevent, .hidlucky, .hidexit, .undiscovered {
+    background-color: black;
+}
+
+.battle {
+    background-color: red;
+}
+
+.foundevent {
+    background-color: yellow;
+}
+
+.lucky {
+    background-color: lime;
+}
+
+.discovered {
+    background-color: gray;
+}
