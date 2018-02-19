@@ -59,7 +59,7 @@ function makeUser() {
 function postUser(obj) {
     $.ajax({
         type: "POST",
-        url: URL = "../info/users.json",
+        url: URL = "../dungeon-proto/info/users.json",
         data: obj,
         datatype: "json",
         success: function(json) {
@@ -69,5 +69,5 @@ function postUser(obj) {
 }
 
 function startGame() {
-    window.location = "../game.html"
+    window.location = "../dungeon-proto/game.html"
 }
