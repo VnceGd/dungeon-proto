@@ -15,7 +15,7 @@ function login() {
     var ipass = document.getElementById("exPass").value
     $.ajax({
         type: "GET",
-        url: URL = "../info/users.json",
+        url: URL = "../dungeon-proto/info/users.json",
         datatype: "json",
         success: function(json) {
             for(i = 0; i < json.users.length; i++) {
@@ -37,7 +37,7 @@ function makeUser() {
     var exists = false
     $.ajax({
         type: "GET",
-        url: URL = "../info/users.json",
+        url: URL = "../dungeon-proto/info/users.json",
         datatype: "json",
         success: function(json) {
             for(i = 0; i < json.users.length; i++) {
