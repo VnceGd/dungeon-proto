@@ -15,30 +15,59 @@ var exitPosY = boardHeight
 var exitPos = '(' + exitPosX + ',' + exitPosY + ')'
 
 var level = 1
+var gold = 0
+var MAXHEALTH = 30
+var playerHealth = MAXHEALTH
+
+var inBattle = false
+var inProgress = false
 
 // Resets player to (0,0)
 function setSpawn(x, y) {
-    playerPosX = playerPosY = 0
+    playerPosX = x
+    playerPosY = y
     playerPos = '(' + playerPosX + ',' + playerPosY + ')'
+    // console.log("Spawn set to" + playerPos)
 }
 
 function startGame() {
-    level = 1
-    setBoard()
+    if(inProgress) {
+        if(confirm("Restart the game?")) {
+            level = 1
+            gold = 0
+            playerHealth = MAXHEALTH
+            setBoard()
+        }
+    }
+    else {
+        level = 1
+        gold = 0
+        playerHealth = MAXHEALTH
+        setBoard()
+    }
+    inProgress = true
+}
+
+function saveGame() {
+    console.log("Saving...")
+    // Run save
+    console.log("Game saved.")
 }
 
 // Sets width and height of board, then generates it
 function setBoard() {
     // boardWidth = document.getElementById("width").value
     // boardHeight = document.getElementById("height").value
-    boardWidth = boardHeight = level + 4
+    boardWidth = boardHeight = 6
     if(level == 1) {
         setSpawn(0, 0)
     }
     else {
-        setSpawn(Math.floor(Math.random * boardWidth), Math.floor(Math.random * boardHeight))
+        setSpawn(exitPosX, exitPosY)
     }
+
     document.getElementById("level").innerHTML = level
+    document.getElementById("playerHealth").innerHTML = playerHealth
     makeBoard()
 }
 
@@ -66,13 +95,13 @@ function makeBoard() {
 }
 
 function setTile() {
-    var roll = Math.floor(Math.random() * 10)
+    var roll = Math.floor(Math.random() * 100)
     var str = ''
-    if(roll > 7 && roll < 10)
+    if(roll > 75 && roll <= 100)
         return 'hidbattle'
-    if(roll > 3 && roll < 7)
+    else if(roll >= 0 && roll < 25)
         return 'hidevent'
-    if(roll == 7)
+    else if(roll >= 25 && roll < 30)
         return 'hidlucky'
     else
         return 'undiscovered'
@@ -90,7 +119,7 @@ function setPlayer() {
     deletePlayer()
     playerPos = '(' + playerPosX + ',' + playerPosY + ')'
     var tile = document.getElementById(playerPos)
-    tile.innerHTML += '<div id="player"> </div>'
+    tile.innerHTML += "<div class='token' id='player'> </div>"
 }
 
 // Creates an event at a pseudo-random location
@@ -109,25 +138,83 @@ function setExit() {
     exitPosX = Math.floor(Math.random() * boardWidth)
     exitPosY = Math.floor(Math.random() * boardHeight)
     exitPos = '(' + exitPosX + ',' + exitPosY + ')'
-    if(exitPosX < playerPosX + 2 && exitPosX > playerPosX - 2 && exitPosY < playerPosY + 2 && exitPosY < playerPosY - 2) {
+    if(level == 1) {
+        while(exitPosX == 0 && exitPosY == 0) {
+            setExit()
+        }
+    }
+    while(exitPosX < playerPosX + 2 && exitPosX > playerPosX - 2 && exitPosY < playerPosY + 2 && exitPosY < playerPosY - 2) {
         setExit()
     }
     var tile = document.getElementById(exitPos)
     tile.className = 'hidexit'
-    console.log("exit at: " + exitPos)
+    // console.log("exit at: " + exitPos)
 }
 
 // Play event when player reaches certain coordinate
 function playEvent() {
     console.log("Event!")
+    gold += 1
+    var bonus = Math.floor(Math.random())
+    playerHealth += bonus
+    if(bonus > 0)
+        document.getElementById("eventDesc").innerHTML = 'You found a health potion among the treasure. Gold +1, Health +1'
+    else
+        document.getElementById("eventDesc").innerHTML = 'You found some gold pieces. Gold +1'
+    document.getElementById("gold").innerHTML = gold
 }
 
 function playBattle() {
     console.log("Battle!")
+    var modal = document.getElementById("battleModal")
+    showBattle(modal)
+    var atkBtn = document.getElementById("atk")
+
+    inBattle = true
+    monsterHealth = Math.floor(Math.random() * 4 + 1)
+    document.getElementById("eventDesc").innerHTML = 'You fought a monster and took ' + monsterHealth + ' damage.'
+
+    // document.getElementById("playerHealth").innerHTML = playerHealth
+    document.getElementById("playerHP").innerHTML = playerHealth
+    document.getElementById("monsterHP").innerHTML = monsterHealth
+
+    console.log("Entering battle")
+    atkBtn.onclick = function() {
+        console.log("ATTACK")
+        monsterHealth -= 1
+        playerHealth -= 1
+        document.getElementById("playerHP").innerHTML = playerHealth
+        document.getElementById("monsterHP").innerHTML = monsterHealth
+        if(monsterHealth <= 0) {
+            closeBattle(modal)
+            inBattle = false
+            document.getElementById("playerHealth").innerHTML = playerHealth
+        }
+        if(playerHealth <= 0) {
+            closeBattle(modal)
+            document.getElementById("playerHealth").innerHTML = playerHealth
+            defeat()
+        }
+    }
+    console.log("Battle finished")
+}
+
+function showBattle(modal) {
+    modal.style.display = "block"
+    document.getElementById("atk").focus();
+}
+
+function closeBattle(modal) {
+    modal.style.display = "none"
 }
 
 function playLucky() {
     console.log("Lucky!")
+    playerHealth += 10
+    if(playerHealth > MAXHEALTH)
+        playerHealth = MAXHEALTH
+    document.getElementById("playerHealth").innerHTML = playerHealth
+    document.getElementById("eventDesc").innerHTML = 'You find a large health potion. Health +10'
 }
 
 function exit() {
@@ -147,6 +234,12 @@ function exit() {
 
 function finish() {
     alert("You reached the end!")
+    inProgress = false
+}
+
+function defeat() {
+    alert("Game over. You collected " + gold + " treasures.")
+    inProgress = false
 }
 
 // Marks tiles as visited as the player reaches them
@@ -154,30 +247,37 @@ function visit() {
     var tile = document.getElementById(playerPos)
     if(tile.className == "undiscovered") {
         tile.className = "discovered"
+        document.getElementById("eventDesc").innerHTML = ''
     }
     if(tile.className == "hidevent") {
         tile.className = "foundevent"
+        tile.innerHTML += "<div class='token' id='treasure'></div>"
         playEvent()
     }
     if(tile.className == "hidbattle") {
         tile.className = "battle"
+        tile.innerHTML += "<div class='token' id='monster'></div>"
         playBattle()
     }
     if(tile.className == "hidlucky") {
         tile.className = "lucky"
+        tile.innerHTML += "<div class='token' id='lucky'></div>"
         playLucky()
     }
     if(tile.className == "hidexit") {
         tile.className = "exit"
+        document.getElementById("eventDesc").innerHTML = 'You found the exit!'
     }
-    if(tile.className == "exit") 
+    if(tile.className == "exit") {
         exit()
+    }
+    document.getElementById("playerHealth").innerHTML = playerHealth
 }
 
 // Moves the player up, down, left, or right
 function movePlayer(e) {
     var player = document.getElementById("player")
-    if(!player)
+    if(!player || inBattle == true)
         return
     if(e.code == 'KeyW') {
         if(playerPosY <= 0)
@@ -209,5 +309,5 @@ function movePlayer(e) {
     }
     setPlayer()
     visit()
-    console.log("Moved to (" + playerPosX + "," + playerPosY + ")")
+    // console.log("Moved to (" + playerPosX + "," + playerPosY + ")")
 }

@@ -4,16 +4,16 @@
     <head>
         <title> Game Title </title>
 
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"> </script>
+
         <link rel="stylesheet" href="stylesheets/style.css">
         <script src="scripts/interact.js"> </script>
-
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"> </script>
     </head>
     <body onkeypress="movePlayer(event)">
         <div class="nav">
-            <input class="btn" type="button" value="Play" onclick="startGame()"> <br>
-            <a href="help.html"><input class="btn" type="button" value="Help"></a> <br>
-            <input class="btn" type="button" value="Options"> <br>
+            <input class="btn" type="button" value="Start Game" onclick="startGame()"> <br>
+            <input class="btn" type="button" value="Save Game" onclick="saveGame()"> <br>
+            <a href="#"><input class="btn" type="button" value="Help" onclick="showHelp()"></a> <br>
             <a href="login.html"><input class="btn" type="button" value="Back to Login"></a> <br>
             <!-- <input class="btn" type="button" value="Reset Player" onclick="reset()"> <br> -->
             <br>
@@ -29,14 +29,88 @@
             <p id="level"> 
                 <!-- Current level goes here -->
             </p>
-            <h4> How to play: </h4>
-            <p> W, A, S, D to move </p>
+            <h4> Health: </h4>
+            <p id="playerHealth">
+                <!-- Current health goes here -->
+            </p>
+            <h4> Treasures Found: </h4>
+            <p id="gold">
+                <!-- Current gold goes here -->
+            </p> 
+            <br>
+            <hr>
+            <p id="eventDesc">
+                <!-- Current event goes here -->
+            </p>
         </div>
+
         <div id="world">
             <table id="board">
                 <!-- Board is generated here -->
             </table>
         </div>
 
+        <div class="modal" id="helpModal">
+            <div class="modal-content">
+                <input class="btn" type="button" value="Back to game" onclick="closeHelp()"></input>
+                <h1> How to play </h1>
+                <p> Use the W, A, S, D keys to move from tile to tile. </p>
+                <!-- <p> When an encounter is reached, follow the instructions that appear. </p> -->
+                <h2> Saving progress </h2>
+                <p> Click the 'Save Game' button to save the state of the current game. </p>
+                <h2> Icons </h2>
+                <table id="iconTable">
+                    <tr>
+                        <th> Hero </th>
+                        <th> Monster </th>
+                        <th> Treasure </th>
+                    </tr>
+                    <tr>
+                        <td> <img src="./images/heroToken.png"> </td>
+                        <td> <img src="./images/monsterToken.png"> </td>
+                        <td> <img src="./images/treasureToken.png"> </td>
+                    </tr>
+                    <tr>
+                        <td> The hero that you control. </td>
+                        <td> Monsters that you battle in the dungeon. </td>
+                        <td> Treasures that contain loot. </td>
+                    </tr>
+                </table>
+                <br>
+                <input class="btn" type="button" value="Back to game" onclick="closeHelp()"></input>
+            </div>
+        </div>
+        <div class="modal" id="battleModal">
+                <div class="modal-content">
+                    <div class="left">
+                            <img src="./images/heroToken.png">
+                            <p> Health: </p>
+                            <p id="playerHP"> </p>
+                    </div>
+                    <div class="right">
+                            <img src="./images/monsterToken.png">
+                            <p> Health: </p>
+                            <p id="monsterHP"> </p>
+                    </div>
+                    <input class="btn" id="atk" type="button" value="Battle!" autofocus>
+                    <!-- <input class="btn" type="button" value="Continue" onclick="closeBattle()"> -->
+                </div>
+            </div>
+
+        <script>
+            var helpModal = document.getElementById("helpModal")
+            var battleModal = document.getElementById("battleModal")
+            function showHelp() {
+                helpModal.style.display = "block"
+            }
+
+            function closeHelp() {
+                helpModal.style.display = "none"
+            }
+
+            function closeBattle() {
+                battleModal.style.display = "none"
+            }
+        </script>
     </body>
 </html>
