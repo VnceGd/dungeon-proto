@@ -2,7 +2,7 @@
 <!-- Vincent Nguyen 2018 -->
 <html>
     <head>
-        <title> Game Title </title>
+        <title> Dungeon Dilemma </title>
 
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"> </script>
 
@@ -11,7 +11,7 @@
     </head>
     <body onkeypress="movePlayer(event)">
         <div class="nav">
-            <input class="btn" type="button" value="Start Game" onclick="startGame()"> <br>
+            <input class="btn" type="button" value="New Game" onclick="startGame()"> <br>
             <input class="btn" type="button" value="Save Game" onclick="saveGame()"> <br>
             <a href="#"><input class="btn" type="button" value="Help" onclick="showHelp()"></a> <br>
             <a href="login.html"><input class="btn" type="button" value="Back to Login"></a> <br>
@@ -54,26 +54,37 @@
             <div class="modal-content">
                 <input class="btn" type="button" value="Back to game" onclick="closeHelp()"></input>
                 <h1> How to play </h1>
+                <p> You start with 30 health. Your goal is to escape through all 10 levels of the dungeon. </p>
+                <p> In every level, each tile has a chance to contain a monster, treasure, or health restore. </p>
+                <p> There is also one exit tile. </p>
+                <br>
+                <h3> Controls: </h3>
                 <p> Use the W, A, S, D keys to move from tile to tile. </p>
+                <p> Buttons will appear on screen when an encounter is reached. </p>
+                <br>
                 <!-- <p> When an encounter is reached, follow the instructions that appear. </p> -->
-                <h2> Saving progress </h2>
+                <h3> Saving progress </h3>
                 <p> Click the 'Save Game' button to save the state of the current game. </p>
+                <br>
                 <h2> Icons </h2>
                 <table id="iconTable">
                     <tr>
                         <th> Hero </th>
                         <th> Monster </th>
                         <th> Treasure </th>
+                        <th> Health Restore </th>
                     </tr>
                     <tr>
                         <td> <img src="./images/heroToken.png"> </td>
                         <td> <img src="./images/monsterToken.png"> </td>
                         <td> <img src="./images/treasureToken.png"> </td>
+                        <td> <img src="./images/luckyToken.png"> </td>
                     </tr>
                     <tr>
-                        <td> The hero that you control. </td>
-                        <td> Monsters that you battle in the dungeon. </td>
-                        <td> Treasures that contain loot. </td>
+                        <td> The hero you control </td>
+                        <td> Initiates a battle </td>
+                        <td> Provides treasures and sometimes health </td>
+                        <td> A rare tile that restores 5 health </td>
                     </tr>
                 </table>
                 <br>
@@ -93,6 +104,11 @@
                             <p id="monsterHP"> </p>
                     </div>
                     <input class="btn" id="atk" type="button" value="Battle!" autofocus>
+                    <input class="btn" id="flee" type="button" value="Flee Battle">
+                    <input class="btn" id="leaveBattle" type="button" value="Done" style="display: none">
+                    <div id="battleText">
+                        <!-- Battle text goes here -->
+                    </div>
                     <!-- <input class="btn" type="button" value="Continue" onclick="closeBattle()"> -->
                 </div>
             </div>
