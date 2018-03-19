@@ -3,28 +3,23 @@
 <html>
     <head>
         <title> Dungeon Dilemma </title>
+        <link rel="icon" href="images/heroToken.png">
 
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"> </script>
 
         <link rel="stylesheet" href="stylesheets/style.css">
         <script src="scripts/interact.js"> </script>
     </head>
-    <body onkeypress="movePlayer(event)">
+    <body>
         <div class="nav">
-            <input class="btn" type="button" value="New Game" onclick="startGame()"> <br>
-            <input class="btn" type="button" value="Save Game" onclick="saveGame()"> <br>
-            <a href="#"><input class="btn" type="button" value="Help" onclick="showHelp()"></a> <br>
-            <a href="login.html"><input class="btn" type="button" value="Back to Login"></a> <br>
-            <!-- <input class="btn" type="button" value="Reset Player" onclick="reset()"> <br> -->
+            <input id="new" class="btn" type="button" value="New Game" onclick="newGame()"> 
+            <input id="reset" class="btn" type="button" value="Reset" onclick="clearWorld()" style="display:none">
             <br>
-            <!--
-            <h4> Board size: </h4>
-            <p> Width: </p>
-            <input id="width" type="text" value="5">
-            <p> Height: </p>
-            <input id="height" type="text" value="5"> <br>
-            -->
-            <!-- <input class="btn" type="button" value="Set" onclick="setBoard()"> <br> -->
+            <input class="btn" type="button" value="Save Game" onclick="saveGame()"> <br>
+            <input class="btn" type="button" value="Help" onclick="showHelp()"> <br>
+            <input class="btn" type="button" value="Settings" onclick="showSettings()"> <br>
+            <a href="login.html"><input class="btn" type="button" value="Back to Login"></a> <br>
+            <br>
             <h4> Level: </h4>
             <p id="level"> 
                 <!-- Current level goes here -->
@@ -54,7 +49,7 @@
             <div class="modal-content">
                 <input class="btn" type="button" value="Back to game" onclick="closeHelp()"></input>
                 <h1> How to play </h1>
-                <p> You start with 30 health. Your goal is to escape through all 10 levels of the dungeon. </p>
+                <p> Your goal is to escape through all 10 levels of the dungeon. </p>
                 <p> In every level, each tile has a chance to contain a monster, treasure, or health restore. </p>
                 <p> There is also one exit tile. </p>
                 <br>
@@ -62,7 +57,6 @@
                 <p> Use the W, A, S, D keys to move from tile to tile. </p>
                 <p> Buttons will appear on screen when an encounter is reached. </p>
                 <br>
-                <!-- <p> When an encounter is reached, follow the instructions that appear. </p> -->
                 <h3> Saving progress </h3>
                 <p> Click the 'Save Game' button to save the state of the current game. </p>
                 <br>
@@ -91,42 +85,40 @@
                 <input class="btn" type="button" value="Back to game" onclick="closeHelp()"></input>
             </div>
         </div>
+        <div class="modal" id="settingsModal">
+            <div class="modal-content">
+                <input class="btn" type="button" value="Back to game" onclick="closeSettings()"></input>
+                <br>
+                <h2> Starting Health </h2>
+                <p><input id="startHealth" class="btn" type="text" value="30" oninput="checkHealth()"> <i>10-50 (default: 30)</i> </p>
+                <h2> Board size </h2>
+                <p><input id="boardLen" class="btn" type="text" value="6" oninput="checkBoardLen()"> <i>5-8 (default: 6)</i> </p>
+                <br>
+                <!-- <p><input id="offline" class="tog" type="checkbox" onchange="toggleOffline()"> Offline Mode </p> -->
+                <input class="btn" type="button" value="Back to game" onclick="closeSettings()"></input>
+            </div>
+        </div>
         <div class="modal" id="battleModal">
-                <div class="modal-content">
-                    <div class="left">
-                            <img src="./images/heroToken.png">
-                            <p> Health: </p>
-                            <p id="playerHP"> </p>
-                    </div>
-                    <div class="right">
-                            <img src="./images/monsterToken.png">
-                            <p> Health: </p>
-                            <p id="monsterHP"> </p>
-                    </div>
-                    <input class="btn" id="atk" type="button" value="Battle!" autofocus>
-                    <input class="btn" id="flee" type="button" value="Flee Battle">
-                    <input class="btn" id="leaveBattle" type="button" value="Done" style="display: none">
-                    <div id="battleText">
-                        <!-- Battle text goes here -->
-                    </div>
-                    <!-- <input class="btn" type="button" value="Continue" onclick="closeBattle()"> -->
+            <div class="modal-content">
+                <div class="left">
+                        <img src="./images/heroToken.png">
+                        <p> Health: </p>
+                        <p id="playerHP"> </p>
+                </div>
+                <div class="right">
+                        <img src="./images/monsterToken.png">
+                        <p> Health: </p>
+                        <p id="monsterHP"> </p>
+                </div>
+                <div class="mid">
+                        <input class="btn" id="atk" type="button" value="Battle!" autofocus>
+                        <input class="btn" id="flee" type="button" value="Flee Battle (Need 4+ treasures)">
+                        <input class="btn" id="leaveBattle" type="button" value="Done" style="display: none">
+                </div>
+                <div id="battleText">
+                    <!-- Battle text goes here -->
                 </div>
             </div>
-
-        <script>
-            var helpModal = document.getElementById("helpModal")
-            var battleModal = document.getElementById("battleModal")
-            function showHelp() {
-                helpModal.style.display = "block"
-            }
-
-            function closeHelp() {
-                helpModal.style.display = "none"
-            }
-
-            function closeBattle() {
-                battleModal.style.display = "none"
-            }
-        </script>
+        </div>
     </body>
 </html>
