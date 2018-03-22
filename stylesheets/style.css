@@ -1,7 +1,7 @@
 /* 
 style.css 
 Vincent Nguyen
-Feb 2018
+March 2018
 */
 
 body {
@@ -11,20 +11,42 @@ body {
     font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
 }
 
+.btn {
+    transition: .1s;
+    background-color: #eee;
+    border: none;
+    color: black;
+    padding: 1%;
+    text-decoration: none;
+}
+
+.btn:hover {
+    transition: .1s;
+    box-shadow: 0 3px 3px -3px black;
+}
+
+.btn:active {
+    background-color: #fff;
+}
+
 .nav {
     position: absolute;
     float: left;
     width: 20%;
     height: 100%;
     margin: 0;
-    background-color: #eee;
+    background-color: #ddd;
+    background-image: url("../images/tile.png");
+    background-size: 100%;
+    background-repeat: repeat-y;
+    image-rendering: pixelated;
     overflow: auto;
 }
 
 .nav input {
     width: 80%;
     font-size: 1em;
-    margin: 5% 6% 0% 6%;
+    margin: 5% 10% 0% 10%;
 }
 
 .nav p, h4 {
@@ -32,6 +54,7 @@ body {
 }
 
 #world {
+    background: radial-gradient(#333, #111);
     position: absolute;
     float: right;
     width: 80%;
@@ -85,23 +108,24 @@ body {
 }
 
 .battle {
-    background-color: rgba(255, 0, 0, 0.7);
+    background: radial-gradient(rgba(255, 0, 0, 0.75), rgba(255, 0, 0, 0.5));
 }
 
 .foundevent {
-    background-color: rgba(255, 255, 0, 0.7);
+    background: radial-gradient(rgba(255, 255, 0, 0.75), rgba(255, 255, 0, 0.5));
 }
 
 .lucky {
-    background-color: rgba(0, 255, 0, 0.7);
+    background: radial-gradient(rgba(0, 255, 0, 0.75), rgba(0, 255, 0, 0.5));
 }
 
 .discovered {
-    background-color: gray;
+    background: radial-gradient(rgba(150, 150, 150, 0.75), rgba(150, 150, 150, 0.5));
 }
 
 .exit {
-    background-color: white;
+    background: radial-gradient(rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.5));
+    background-color: rgba(255 , 255, 255, 0.75);
 }
 
 .modal {

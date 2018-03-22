@@ -1,6 +1,9 @@
 // login.js
-// Vincent Nguyen 2018
+// CS275 Term Project - Dungeon Dilemma
+// Vincent Nguyen 
+// March 2018
 
+// Insecure login method using json
 function login() {
     var iname = document.getElementById("exUser").value
     var ipass = document.getElementById("exPass").value
@@ -22,6 +25,8 @@ function login() {
     })
 }
 
+// DEPRECATED
+// Inserts a user into the users.json file.
 function makeUser() {
     var iname = document.getElementById("newUser").value
     var ipass = document.getElementById("newPass").value
@@ -47,18 +52,7 @@ function makeUser() {
     })
 }
 
-function postUser(obj) {
-    $.ajax({
-        type: "POST",
-        url: URL = "../dungeon-proto/info/users.json",
-        data: obj,
-        datatype: "json",
-        success: function(json) {
-            console.log(data)
-        }
-    })
-}
-
+// Switches window to game
 function startGame() {
     window.location = "../game.html"
 }

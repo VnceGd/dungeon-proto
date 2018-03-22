@@ -18,7 +18,6 @@ function checkHealth() {
     else if(hp.value < MINSTART)
         hp.value = MINSTART
     MAXHEALTH = hp.value
-    console.log("Set max health to: " + MAXHEALTH)
 }
 
 var MINBOARDLEN = 5
@@ -32,9 +31,9 @@ function checkBoardLen() {
     else if(len.value < MINBOARDLEN)
         len.value = MINBOARDLEN
     boardLen = len.value
-    console.log("Set board length to: " + boardLen)
 }
 
+// Clears the board and resets numbers
 function clearWorld() {
     if(confirm("This will end the game in progress. Continue?")) {
         document.getElementById('board').innerHTML = ''
@@ -46,7 +45,16 @@ function clearWorld() {
     }
 }
 
+// Switches to login screen
+function toLogin() {
+    if(confirm("Exit game?")) {
+        window.location = "login.html"
+    }
+}
+
 // *** MODAL/MENU MANAGEMENT ***
+// Show sets display to block, close sets display to none.
+// While inMenu, player cannot move.
 
 function showHelp() {
     var helpModal = document.getElementById("helpModal")
@@ -89,29 +97,34 @@ function closeBattle() {
     inMenu = false
 }
 
-// *** VARIABLES ***
+function openSave() {
+    var saveModal = document.getElementById("saveModal")
+    saveModal.style.display = "block"
+    inMenu = true
+}
 
+function closeSave() {
+    var saveModal = document.getElementById("saveModal")
+    saveModal.style.display = "none"
+    inMenu = false
+}
+
+// *** GLOBAL VARIABLES ***
+
+// NOTE: X, Y correspond to table row, column respectively. (Do not think in terms of graph coordinates!)
 var playerPosX, playerPosY = 0
 var playerPos = ''
-
-var eventPosX = boardLen
-var eventPosY = boardLen
-var eventPos = '(' + eventPosX + ',' + eventPosY + ')'
-
-var exitPosX = boardLen
-var exitPosY = boardLen
-var exitPos = '(' + exitPosX + ',' + exitPosY + ')'
 
 var level = 1
 var gold = 0
 
 var inMenu = false
 var inProgress = false
-
 var wait = false
 
 // *** GAME ***
 
+// Check if game in progress, then set initial values and set up board
 function startGame() {
     if(inProgress) {
         if(confirm("Restart the game?")) {
@@ -131,11 +144,148 @@ function startGame() {
     document.getElementById("board").style.opacity = 1;
 }
 
+// Check for active game, then AJAX request with all data to be stored
 function saveGame() {
-    console.log("WARNING: Not Implemented")
-    //console.log("Saving...")
-    // Run save
-    //console.log("Game saved.")
+    if(!inProgress) {
+        document.getElementById("saveMsg").innerHTML = "No game active."
+        return
+    }
+    console.log("Saving...")
+    // Post to server
+    var id = document.getElementById("sessionID").value
+    var pos = playerPosX + ',' + playerPosY
+    var URL = 'save?id=' + id + '&pp=' + pos + '&lvl=' + level + '&hp=' + playerHealth + '&max=' + MAXHEALTH + '&gold=' + gold
+    $.ajax(URL, {
+        type: "GET",
+        url: URL,
+        datatype: "jsonp",
+        success: function(msg) {
+            if(msg == "dup") {
+                // If duplicate key, ask for overwrite
+                if(confirm("Game already exists with that name. Overwrite?")) {
+                    var DEL = 'delete?id=' + id
+                    $.ajax(DEL, {
+                        type: "GET",
+                        url: URL,
+                        datatype: "jsonp",
+                        success: function(msg) {
+                            console.log("Previous save deleted.")
+                            saveGame()
+                            console.log("Game overwritten.")
+                        },
+                        error: function() {
+                            console.log("Error during save.")
+                        }
+                    })
+                }
+            }
+            else {
+                document.getElementById("saveMsg").innerHTML = "Game saved"
+            }
+        },
+        error: function() {
+            console.log("Error during save.")
+        }
+    })
+}
+
+// Check if game in progress then AJAX request for session given by ID
+function loadGame() {
+    if(inProgress) {
+        if(!confirm("End current session and load different game?")) {
+            return
+        }
+    }
+    console.log("Loading...")
+    var id = document.getElementById("sessionID").value
+    var URL = 'load?id=' + id
+    $.ajax(URL, {
+        type: "GET",
+        url: URL,
+        datatype: "jsonp",
+        success: function(msg) {
+            if(msg == 'err') {
+                document.getElementById("saveMsg").innerHTML = "Could not load game."
+                return
+            }
+            var dat = msg.split(' ')
+            playerPos = dat[0]
+            var pos = playerPos.split(',')
+            playerPosX = parseInt(pos[0])
+            playerPosY = parseInt(pos[1])
+            level = parseInt(dat[1])
+            playerHealth = parseInt(dat[2])
+            MAXHEALTH = parseInt(dat[3])
+            gold = parseInt(dat[4])
+            inProgress = true
+
+            var board = msg
+            var str = ''
+            for(var i = 0; i < boardLen; i++) {
+                str += '<tr>'
+                for(var j = 0; j < boardLen; j++) {
+                    var tid = board[i][j]
+                    str += '<td id="(' + i + ',' + j + ')"> </td>'
+                }
+                str += '</tr>'
+            }
+            document.getElementById("board").innerHTML = str
+            setPlayer()
+            visitTile()
+            document.getElementById("board").style.opacity = 1;
+            document.getElementById('reset').style.display = "inline"
+            document.getElementById('new').style.display = "none"
+            updateText()
+            updateTiles()
+            console.log("Game loaded.")
+            return
+        },
+        error: function() {
+            document.getElementById("saveMsg").innerHTML = "Could not load game."
+            console.log("Error during load.")
+        }
+    })
+}
+
+// Reveal all discovered tiles (on load)
+function updateTiles() {
+    console.log("Updating tiles...")
+    var URL = 'update'
+    $.ajax(URL, {
+        type: "GET",
+        url: URL,
+        datatype: "text",
+        success: function(msg) {
+            var len = Math.sqrt(msg.length)
+            var t = 0
+            for(var i = 0; i < len; i++) {
+                for(var j = 0; j < len; j++) {
+                    var pos = '(' + i + ',' + j + ')'
+                    var tile = document.getElementById(pos)
+                    if(msg.charAt(t) == 'd') {
+                        tile.className = 'discovered'
+                    }
+                    else if(msg.charAt(t) == 't') {
+                        tile.className = 'foundevent'
+                    }
+                    else if(msg.charAt(t) == 'b') {
+                        tile.className = 'battle'
+                    }
+                    else if(msg.charAt(t) == 'e') {
+                        tile.className = 'exit'
+                    }
+                    else if(msg.charAt(t) == 'l') {
+                        tile.className = 'lucky'
+                    }
+                    t++
+                }
+            }
+            return
+        },
+        error: function() {
+            console.log("Error while updating tiles.")
+        }
+    })
 }
 
 // *** PLAYER CONTROLLERS ***
@@ -145,7 +295,6 @@ function setSpawn(x, y) {
     playerPosX = x
     playerPosY = y
     playerPos = '(' + playerPosX + ',' + playerPosY + ')'
-    // console.log("Spawn set to" + playerPos)
 }
 
 // Deletes the current player
@@ -164,38 +313,45 @@ function setPlayer() {
 }
 
 // Moves the player up, down, left, or right
-$(document).keypress(function movePlayer(e) {
+$(document).keydown(function movePlayer(e) {
     if(wait == false) {
         var player = document.getElementById("player")
+        if(typeof playerPosX == 'string' || typeof playerPosY == 'string') {
+            playerPosX = parseInt(playerPosX)
+            playerPosY = parseInt(playerPosY)
+        }
         if(!player || inMenu == true)
             return
-        if(e.key == 'w') {
+        else if(e.key == 'w' || e.key == 'W' || e.which == '38') { // 'w' or 'up arrow'
             if(playerPosX <= 0)
                 return
             else {
                 playerPosX -= 1
             }
         }
-        if(e.key == 'a') {
+        else if(e.key == 'a' || e.key == 'A' || e.which == '37') { // 'a' or 'left arrow'
             if(playerPosY <= 0)
                 return
             else {
                 playerPosY -= 1
             }
         }
-        if(e.key == 's') {
+        else if(e.key == 's' || e.key == 'S' || e.which == '40') { // 's' or 'down arrow'
             if(playerPosX >= boardLen - 1)
                 return
             else {
                 playerPosX += 1
             }
         }
-        if(e.key == 'd') {
+        else if(e.key == 'd' || e.key == 'D' || e.which == '39') { // 'd' or 'right arrow'
             if(playerPosY >= boardLen - 1)
                 return
             else {
                 playerPosY += 1
             }
+        }
+        else {
+            return
         }
         wait = true
         setPlayer()
@@ -206,6 +362,7 @@ $(document).keypress(function movePlayer(e) {
 
 // *** EVENTS *** 
 
+// Rewards player with gold and sometimes health
 function playEvent() {
     var bonus = Math.floor(Math.random() * 2)
     var gain = bonus + 1
@@ -214,35 +371,38 @@ function playEvent() {
         playerHealth += 1
         if(playerHealth > MAXHEALTH)
             playerHealth = MAXHEALTH
-        document.getElementById("playerHealth").innerHTML = playerHealth + "  (<b style='color: green'>+1</b>)"
-        document.getElementById("eventDesc").innerHTML = 'You found a health potion among the treasure. Gold +' + gain + ', Health +1'
+        document.getElementById("playerHealth").innerHTML = playerHealth + "/" + MAXHEALTH + "  (<b style='color: green'>+1</b>)"
+        document.getElementById("eventDesc").innerHTML = 'You found a health potion among the treasure. <br> Gold +' + gain + ', Health +1'
     }
     else {
-        document.getElementById("eventDesc").innerHTML = 'You found some gold pieces. Gold +' + gain
-        document.getElementById("playerHealth").innerHTML = playerHealth
+        document.getElementById("eventDesc").innerHTML = 'You found some gold pieces. <br> Gold +' + gain
+        document.getElementById("playerHealth").innerHTML = playerHealth + "/" + MAXHEALTH
     }
-    document.getElementById("gold").innerHTML = gold + "  (<b style='color: rgb(150, 150, 0)'>+" + gain + "</b>)"
+    document.getElementById("gold").innerHTML = gold + "  (<b style='color: yellow'>+" + gain + "</b>)"
 }
 
+// Initiates a battle. Two buttons allow for battle decisions.
 function playBattle() {
     var modal = document.getElementById("battleModal")
     showBattle()
+
     var atkBtn = document.getElementById("atk")
     var fleeBtn = document.getElementById("flee")
     var doneBtn = document.getElementById("leaveBattle")
-    monsterHealth = Math.floor(Math.random() * 4 + 1)
+
+    // Monster starts with 1 to 4 health.
+    var monsterStartHP = Math.floor(Math.random() * 4 + 1)
+    var monsterHealth = monsterStartHP
     var startHP = playerHealth
     var battleTxt = document.getElementById("battleText")
 
-    // document.getElementById("playerHealth").innerHTML = playerHealth
-    document.getElementById("playerHP").innerHTML = playerHealth
-    document.getElementById("monsterHP").innerHTML = monsterHealth
-
-    console.log("Entering battle")
+    document.getElementById("playerHP").innerHTML = playerHealth + "/" + MAXHEALTH
+    document.getElementById("monsterHP").innerHTML = monsterHealth + "/" + monsterStartHP
 
     battleTxt.innerHTML = ""
 
     atkBtn.onclick = function() {
+        // Player and monster have 10% chance to miss attack
         var mRoll = Math.floor(Math.random() * 10)
         var pRoll = Math.floor(Math.random() * 10)
 
@@ -259,8 +419,8 @@ function playBattle() {
 
         monsterHealth -= pAtk
         playerHealth -= mAtk
-        document.getElementById("playerHP").innerHTML = playerHealth + "   (<b style='color: red'>-" + mAtk + "</b>)"
-        document.getElementById("monsterHP").innerHTML = monsterHealth + "   (<b style='color: red'>-" + pAtk + "</b>)"
+        document.getElementById("playerHP").innerHTML = playerHealth + "/" + MAXHEALTH + "   (<b style='color: red'>-" + mAtk + "</b>)"
+        document.getElementById("monsterHP").innerHTML = monsterHealth + "/" + monsterStartHP + "   (<b style='color: red'>-" + pAtk + "</b>)"
 
         if(mAtk == 0) {
             if(pAtk == 0)
@@ -276,20 +436,21 @@ function playBattle() {
         }
 
         var hpDiff = startHP - playerHealth
-        document.getElementById("playerHealth").innerHTML = playerHealth + " (<b style='color: red'>-" + hpDiff + "</b>)"
+        document.getElementById("playerHealth").innerHTML = playerHealth + "/" + MAXHEALTH + " (<b style='color: #b1183f'>-" + hpDiff + "</b>)"
         document.getElementById("eventDesc").innerHTML = 'You fought a monster and took ' + hpDiff + ' damage.'
 
         if(playerHealth <= 0) {
+            // Player is defeated, game ends
             atkBtn.style.display = "none"
             fleeBtn.style.display = "none"
             doneBtn.style.display = "inline"
-            // document.getElementById("playerHealth").innerHTML = playerHealth
             battleTxt.innerHTML += " You are defeated."
             document.getElementById("eventDesc").innerHTML += '<br>Game Over.'
             document.getElementById("leaveBattle").focus()
             defeat()
         }
         else if(monsterHealth <= 0) {
+            // Allows player to leave the battle screen
             atkBtn.style.display = "none"
             fleeBtn.style.display = "none"
             doneBtn.style.display = "inline"
@@ -297,10 +458,10 @@ function playBattle() {
             document.getElementById("leaveBattle").focus()
         }
     }
-
     fleeBtn.onclick = function() {
-        if(gold <= 4)
-            battleTxt = "Cannot flee!"
+        // Player uses 1/4 of gold to fleee if they have 4+ gold.
+        if(gold < 4)
+            battleTxt.innerHTML = "Cannot flee!"
         else {
             diff = Math.floor(gold * (1/4))
             gold -= diff
@@ -310,27 +471,28 @@ function playBattle() {
         }
     }
     doneBtn.onclick = function() {
+        // Closes the battle modal.
         closeBattle()
         if(playerHealth <= 0)
             inMenu = true
-        // document.getElementById("playerHealth").innerHTML = playerHealth
         atkBtn.style.display = "inline"
         fleeBtn.style.display = "inline"
         doneBtn.style.display = "none"
     }
     document.getElementById("gold").innerHTML = gold
-    console.log("Battle finished")
 }
 
+// Player receives 5 health
 function playLucky() {
     playerHealth += 5
     if(playerHealth > MAXHEALTH)
         playerHealth = MAXHEALTH
-    document.getElementById("playerHealth").innerHTML = playerHealth + " (<b style='color: green'>+5</b>)"
-    document.getElementById("eventDesc").innerHTML = 'You find a large health potion. Health +5'
+    document.getElementById("playerHealth").innerHTML = playerHealth + "/" + MAXHEALTH + " (<b style='color: green'>+5</b>)"
+    document.getElementById("eventDesc").innerHTML = 'You find a large health potion. <br> Health +5'
     document.getElementById("gold").innerHTML = gold
 }
 
+// Exit a level or finish the game if level 10
 function exit() {
     if(level == 10) {
         finish()
@@ -342,22 +504,45 @@ function exit() {
         // setBoard()
     }
     else {
-        console.log('exit canceled')
+        console.log('Exit canceled')
     }
     return
 }
 
 // *** END GAME ***
 
+// Prompt for score submission. Can be abused by constant loads.
 function finish() {
-    alert("You reached the end! Treasures collected: " + gold)
-    var URL = '/finish'
-    $.ajax({
-
+    var name = prompt("You reached the end! Treasures collected: " + gold + "\nEnter a name to submit your score: ", "")
+    if(!name) {
+        if(confirm("Finish without submitting score?")) {
+            document.getElementById("player").outerHTML = ''
+            return
+        }
+        else
+            finish()
+    }
+    var URL = 'finish?name=' + name + '&score=' + gold
+    $.ajax(URL, {
+        type: "GET",
+        url: URL,
+        success: function(msg) {
+            if(msg == 'dup') {
+                alert("Name taken. Try a different one.")
+                finish()
+            }
+            else {
+                alert("Score submitted")
+                document.getElementById("player").outerHTML = ''
+            }
+        },
+        error: function() {
+            console.log("Error during score submission")
+        }
     })
-    // inProgress = false
 }
 
+// End the game without submitting score
 function defeat() {
     alert("Game over. You collected " + gold + " treasures.")
     document.getElementById("board").style.opacity = 0.5;
@@ -392,8 +577,6 @@ function requestBoard() {
         url: URL,
         datatype: "text",
         success: function(msg) {
-            console.log("Requesting board from " + URL)
-            // console.log(msg)
             var board = msg
             var str = ''
             for(var i = 0; i < boardLen; i++) {
@@ -437,7 +620,7 @@ function updateTile() {
 // Update text in navigation bar
 function updateText() {
     document.getElementById('level').innerHTML = level
-    document.getElementById('playerHealth').innerHTML = playerHealth
+    document.getElementById('playerHealth').innerHTML = playerHealth + "/" + MAXHEALTH
     document.getElementById('gold').innerHTML = gold
     document.getElementById('eventDesc').innerHTML = ''
 }
@@ -488,7 +671,7 @@ function setBoard() {
     }
 
     document.getElementById("level").innerHTML = level
-    document.getElementById("playerHealth").innerHTML = playerHealth
+    document.getElementById("playerHealth").innerHTML = playerHealth + "/" + MAXHEALTH
     document.getElementById("gold").innerHTML = gold
     makeBoard()
 }
@@ -569,7 +752,6 @@ function setExit() {
     }
     var tile = document.getElementById(exitPos)
     tile.className = 'hidexit'
-    // console.log("exit at: " + exitPos)
 }
 
 // Marks tiles as visited as the player reaches them
@@ -579,7 +761,7 @@ function visit() {
         tile.className = "discovered"
         document.getElementById("eventDesc").innerHTML = ''
         document.getElementById("gold").innerHTML = gold
-        document.getElementById("playerHealth").innerHTML = playerHealth
+        document.getElementById("playerHealth").innerHTML = playerHealth + "/" + MAXHEALTH
     }
     if(tile.className == "hidevent") {
         tile.className = "foundevent"

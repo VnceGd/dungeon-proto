@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- Dungeon Dilemma (CS275 Term Project) -->
 <!-- Vincent Nguyen 2018 -->
 <html>
     <head>
@@ -15,10 +16,10 @@
             <input id="new" class="btn" type="button" value="New Game" onclick="newGame()"> 
             <input id="reset" class="btn" type="button" value="Reset" onclick="clearWorld()" style="display:none">
             <br>
-            <input class="btn" type="button" value="Save Game" onclick="saveGame()"> <br>
+            <input class="btn" type="button" value="Save/Load" onclick="openSave()"> <br>
             <input class="btn" type="button" value="Help" onclick="showHelp()"> <br>
             <input class="btn" type="button" value="Settings" onclick="showSettings()"> <br>
-            <a href="login.html"><input class="btn" type="button" value="Back to Login"></a> <br>
+            <input class="btn" type="button" value="Back to Login" onclick="toLogin()"> <br>
             <br>
             <h4> Level: </h4>
             <p id="level"> 
@@ -45,6 +46,17 @@
             </table>
         </div>
 
+        <div class="modal" id="saveModal">
+            <div class="modal-content">
+                <input class="btn" type="button" value="Back" onclick="closeSave()"> <br> <br>
+                <input id="sessionID" type="text" placeholder="Enter a session ID"> 
+                <br> <br>
+                <input id="saveBtn" class="btn" type="button" value="Save" onclick="saveGame()">
+                <input id="loadBtn" class="btn" type="button" value="Load" onclick="loadGame()">
+                <br>
+                <p id="saveMsg"> </p>
+            </div>
+        </div>
         <div class="modal" id="helpModal">
             <div class="modal-content">
                 <input class="btn" type="button" value="Back to game" onclick="closeHelp()"></input>

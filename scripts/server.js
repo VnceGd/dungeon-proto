@@ -6,6 +6,7 @@
 // *** DATABASE CONNECTION ***
 var mysql = require('mysql')
 var con = mysql.createConnection({
+    // Local database
     host: 'localhost',
     user: 'root',
     password: 'myPreSeq34',
@@ -25,18 +26,111 @@ var app = express()
 
 app.use(express.static("."))
 app.listen(8080, function() {
+    // Local host
     console.log("App started")
 })
 
 var board = []
 var boardlen;
 
-app.post('/save', function(req, res) {
-    console.log("Saving board...")
+// Receives needed data and stores it into the local database
+app.get('/save', function(req, res) {
+    console.log("Saving session...")
+    var id = req.query.id
+    var pos = req.query.pp
+    var level = req.query.lvl
+    var hp = req.query.hp
+    var maxHP = req.query.max
+    var gold = req.query.gold
+    var tiles = ''
+    for(var i = 0; i < board.length; i++) {
+        for(var j = 0; j < board.length; j++) {
+            tiles += board[i][j]
+        }
+    }
+    if(!id || !pos || !level || !hp || !maxHP || !tiles) {
+        console.log("Error: Invalid parameters.")
+        return
+    }
+    var vals = "'" + id + "', '" + pos + "', " + level + ", " + hp + ", " + maxHP + ", " + gold + ", '" + tiles + "'"
+    var q = "INSERT into sessions (id, pos, level, health, maxhealth, gold, tiles) values ("
+    q += vals + ")"
+    /* Fast overwrite, unused */
+    // q += "ON DUPLICATE KEY UPDATE "
+    // q += "pos = '" + pos + "', level = " + level + ", health = " + hp + ", maxhealth = " + maxHP + ", gold = " + gold + ", tiles = '" + tiles + "'"
+    con.query(q,
+    function(err, rows, fields) {
+        if(err) {
+            console.log(err)
+            console.log("Error during query processing")
+            // If duplicate key entry, send message to ask for overwrite
+            if(err.code == 'ER_DUP_ENTRY') {
+                console.log("Duplicate detected.")
+                res.send("dup")
+            }
+        }
+        else {
+            console.log(rows)
+            console.log("Save successful")
+            return
+        }
+    })
 })
 
-app.get('/finish', function(req, res) {
-    console.log("Saving score...")
+app.get('/load', function(req, res) {
+    console.log("Loading session...")
+    var id = req.query.id
+    con.query("SELECT * from sessions where id = '" + id + "'",
+    function(err, rows, fields) {
+        if(err) {
+            console.log(err)
+            console.log("Error during query processing")
+            res.send("err")
+            return
+        }
+        else {
+            if(!rows[0]) {
+                console.log("No column with id = " + id)
+                res.send("err")
+                return
+            }   
+            var pos = rows[0].pos
+            var level = rows[0].level
+            var health = rows[0].health
+            var maxhealth = rows[0].maxhealth
+            var gold = rows[0].gold
+            var tiles = rows[0].tiles
+            var data = pos + ' ' + level + ' ' + health + ' ' + maxhealth + ' ' + gold
+            boardlen = Math.sqrt(rows[0].tiles.length)
+            var tile = 0
+            for(var i = 0; i < boardlen; i++) {
+                board[i] = []
+                for(var j = 0; j < boardlen; j++) {
+                    board[i][j] = tiles.charAt(tile)
+                    tile++
+                }
+            }
+            console.log(board)
+            res.send(data)
+            return
+        }
+    })
+})
+
+app.get('/delete', function(req, res) {
+    var id = req.query.id
+    con.query("DELETE from sessions where id = '" + id + "'",
+    function(err, rows, fields) {
+        if(err) {
+            console.log(err)
+            console.log("Cannot delete column where id = " + id)
+        }
+        else {
+            console.log(rows)
+            res.send(id)
+            return
+        }
+    })
 })
 
 // Generate a randomized board with specified player position and board length
@@ -106,7 +200,38 @@ app.get('/visit', function(req, res) {
     else if(board[x][y] == 'o') {
         board[x][y] = 'e'
     }
-    // console.log("Board: " + board)
     // Send tmp tile
     res.send(tmp)
+})
+
+app.get('/update', function(req, res) {
+    console.log("Update tiles requested")
+    var tiles = ''
+    for(var i = 0; i < board.length; i++) {
+        for(var j = 0; j < board.length; j++) {
+            tiles += board[i][j]
+        }
+    }
+    res.send(tiles)
+    return tiles
+})
+
+app.get('/finish', function(req, res) {
+    console.log("Submitting score...")
+    var name = req.query.name
+    var score = req.query.score
+    con.query("INSERT into scores (name, score) values ('" + name + "', " + score + ")",
+    function(err, rows, fields) {
+        if(err){
+            console.log(err)
+            if(err.code == "ER_DUP_ENTRY") {
+                res.send("dup")
+                return
+            }
+        }
+        else {
+            res.send("success")
+            return
+        }
+    })
 })
