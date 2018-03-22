@@ -355,8 +355,8 @@ $(document).keydown(function movePlayer(e) {
         }
         wait = true
         setPlayer()
-        // visit()
         visitTile()
+        // visit() /* Offline mode only */
     }
 })
 

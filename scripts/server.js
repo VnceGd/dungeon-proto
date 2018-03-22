@@ -6,7 +6,9 @@
 // *** DATABASE CONNECTION ***
 var mysql = require('mysql')
 var con = mysql.createConnection({
-    // Local database
+    // Local database -- SET UP ON LOCAL MACHINE --
+    // Database: dungeon_dilemma
+    // Tables: sessions, scores
     host: 'localhost',
     user: 'root',
     password: 'myPreSeq34',
