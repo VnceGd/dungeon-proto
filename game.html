@@ -10,6 +10,7 @@
 
         <link rel="stylesheet" href="stylesheets/style.css">
         <script src="scripts/interact.js"> </script>
+        <script src="scripts/login.js"></script>
     </head>
     <body>
         <div class="nav">
@@ -49,6 +50,19 @@
         <div class="modal" id="saveModal">
             <div class="modal-content">
                 <input class="btn" type="button" value="Back" onclick="closeSave()"> <br> <br>
+                <h3>Existing User Login</h3>
+                <input id="exUser" type="text" placeholder="Username">
+                <input id="exPass" type="password" placeholder="Password">
+                <input id="exLogin" type="button" value="Submit" onclick="sqlLogin()">
+                
+                <h3>New User Account Creation</h3>
+                <input id="newUser" type="text" placeholder="Username">
+                <input id="newPass" type="password" placeholder="Password">
+                <input id="newLogin" type="button" value="Submit" onclick="newUser()">
+                <br>
+                <div id="output"></div>
+                <br>
+                <h3>Save/Load Session by ID</h3>
                 <input id="sessionID" type="text" placeholder="Enter a session ID"> 
                 <br> <br>
                 <input id="saveBtn" class="btn" type="button" value="Save" onclick="saveGame()">

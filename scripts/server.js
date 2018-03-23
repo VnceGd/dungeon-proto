@@ -25,6 +25,10 @@ con.connect(function(err) {
 // *** EXPRESS APP STARTUP ***
 var express = require('express')
 var app = express()
+var bodyParser = require('body-parser')
+
+app.use(bodyParser.urlencoded({extended:false}))
+app.use(bodyParser.json())
 
 app.use(express.static("."))
 app.listen(8080, function() {
@@ -34,6 +38,53 @@ app.listen(8080, function() {
 
 var board = []
 var boardlen;
+
+app.post('/login', function(req, res) {
+    var userID = req.body.userID
+    var pass = req.body.password
+    var sql = "SELECT * FROM users WHERE userID = ? AND password = ?"
+    con.query(sql, [userID, pass], function(err, result) {
+        if(err) {
+            throw err
+        }
+        if(result.length > 0) {
+            con.query("SELECT sessionID FROM users WHERE userID = '" + userID + "'", function(err, result) {
+                if(err)
+                    throw err
+                else {
+                    console.log(result[0].sessionID)
+                    var URL = 'load?id=' + result[0].sessionID
+                    res.send(result[0].sessionID)
+                    console.log("Retrieved session")
+                }
+            })
+        }
+        else 
+            res.send(null)
+    })
+})
+
+app.post('/newUser', function(req, res) {
+    var userID = req.body.userID
+    var pass = req.body.password
+    var sql = "SELECT * FROM users WHERE userID = ?"
+    con.query(sql, [userID], function(err, result) {
+        if(err) {
+            throw err
+        }
+        if(result.length > 0)
+            res.send("User already exists. Please try a different username.")
+        else {
+            con.query("INSERT into users (userID, password) values ('" + userID + "', '" + pass + "')",
+            function(err, result) {
+                if(err)
+                    throw err
+                else
+                    res.send("User created.")
+            })   
+        }
+    })
+})
 
 // Receives needed data and stores it into the local database
 app.get('/save', function(req, res) {
@@ -81,6 +132,7 @@ app.get('/save', function(req, res) {
 
 app.get('/load', function(req, res) {
     console.log("Loading session...")
+    board = []
     var id = req.query.id
     con.query("SELECT * from sessions where id = '" + id + "'",
     function(err, rows, fields) {
